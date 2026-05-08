@@ -1,4 +1,4 @@
-name: Wikipedia Playwright E2E Tests
+name: Wikipedia Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  test:
+  e2e-test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
@@ -28,3 +28,15 @@ jobs:
 
       - name: Run Wikipedia Playwright test
         run: pytest test_wikipedia.py
+
+  performance-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Run k6 performance test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: performance.js
