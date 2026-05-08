@@ -1,12 +1,24 @@
 import re
-from playwright.sync_api import Page, expect
+from playwright.sync_api import sync_playwright
 
 
-def test_user_can_search_wikipedia_and_open_article(page: Page):
-    page.goto("https://www.wikipedia.org/")
+def test_user_can_search_wikipedia_and_open_article():
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
 
-    page.get_by_role("searchbox").fill("University of Chicago")
-    page.keyboard.press("Enter")
+        # Arrange
+        page.goto("https://www.wikipedia.org/")
 
-    expect(page).to_have_url(re.compile(".*University_of_Chicago.*"))
-    expect(page.get_by_role("heading", name="University of Chicago")).to_be_visible()
+        # Act
+        page.get_by_role("searchbox").fill("University of Chicago")
+        page.keyboard.press("Enter")
+
+        # Assert
+        page.wait_for_url(re.compile(".*University_of_Chicago.*"))
+        assert "University_of_Chicago" in page.url
+        assert page.get_by_role("heading", name="University of Chicago").is_visible()
+
+        page.screenshot(path="screenshots/wikipedia_search.png")
+
+        browser.close()
